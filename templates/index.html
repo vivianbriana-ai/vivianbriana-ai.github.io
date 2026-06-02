@@ -1,1 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Station Dashboard</title>
+    <!-- Include Chart.js via CDN for easy graph visualizations -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #eef2f3; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .value { font-size: 2rem; font-weight: bold; color: #2c3e50; margin-top: 10px; }
+        .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Live Weather Station</h1>
+        
+        <!-- Grid layout for the latest individual sensor numbers -->
+        <div class="grid">
+            <div class="card">
+                <h3>Temperature</h3>
+                <div class="value">{{ latest.temperature if latest else '--' }} °C</div>
+            </div>
+            <div class="card">
+                <h3>Humidity</h3>
+                <div class="value">{{ latest.humidity if latest else '--' }} %</div>
+            </div>
+            <div class="card">
+                <h3>Pressure</h3>
+                <div class="value">{{ latest.pressure if latest else '--' }} hPa</div>
+            </div>
+            <div class="card">
+                <h3>Precipitation</h3>
+                <div class="value">
+                    {% if latest %}
+                        {{ 'Raining' if latest.is_raining == 1 else 'Clear' }}
+                    {% else %}
+                        --
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Graph container for historical logs -->
+        <div class="chart-box">
+            <h3>Historical Temperature Trend</h3>
+            <canvas id="tempChart" width="400" height="150"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Extract database logs injected by the Flask backend application
+        const timeLabels = [ {% for row in history %} "{{ row.timestamp }}", {% endfor %} ];
+        const tempData = [ {% for row in history %} {{ row.temperature }}, {% endfor %} ];
+
+        // Construct the visualization dashboard plot 
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: tempData,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    x: { display: true, title: { display: true, text: 'Timestamp' } },
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
 
