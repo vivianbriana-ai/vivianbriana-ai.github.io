@@ -1,0 +1,5 @@
+""" This file acts as an installation checklist for your Raspberry Pi. Tell it exactly what 
+packages are required for a Flask server, database tracking, and your Adafruit hardware."""
+Flask==3.0.2
+adafruit-circuitpython-bme280==2.6.17
+RPi.GPIO==0.7.1
